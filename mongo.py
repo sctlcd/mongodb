@@ -17,7 +17,6 @@ def mongo_connect(url):
         print('Could not connect to MongoDB: %s') % e
 
 conn = mongo_connect(MONGODB_URI)
-
 coll = conn[DBS_NAME][COLLECTION_NAME]
 
 # Insert 1 new record
