@@ -1,35 +1,51 @@
 import pymongo
 import os
 from os import path
-if path.exists('env.py'):
+if path.exists("env.py"):
     import env
 
-MONGODB_URI = os.getenv('MONGO_URI')
-DBS_NAME = 'myTestDB'
-COLLECTION_NAME = 'myFirstMDB'
+MONGODB_URI = os.getenv("MONGO_URI")
+DBS_NAME = "myTestDB"
+COLLECTION_NAME = "myFirstMDB"
+
 
 def mongo_connect(url):
     try:
         conn = pymongo.MongoClient(url)
-        print('Mongo is connected!')
+        print("Mongo is connected!")
         return conn
     except pymongo.errors.ConnectionFailure as e:
-        print('Could not connect to MongoDB: %s') % e
+        print("Could not connect to MongoDB: %s") % e
 
-conn = mongo_connect(MONGODB_URI)
-coll = conn[DBS_NAME][COLLECTION_NAME]
 
 def get_record():
-    print('')
+    print("")
     first = input("Enter first name > ")
     last = input("Enter last name > ")
 
     try:
-        doc = coll.find_one({'first': first.lower(), 'last': last.lower()})
+        doc = coll.find_one({"first": first.lower(), "last": last.lower()})
+    except:
+        print("Error accessing the database")
+
+    if not doc:
+        print("")
+        print("Error! No results found.")
+
+    return doc
+
+
+def find_record():
+    doc = get_record()
+    if doc:
+        print("")
+        for k, v in doc.items():
+            if k != "_id":
+                print(k.capitalize() + ": " + v.capitalize())
 
 
 def add_record():
-    print('')
+    print("")
     first = input("Enter first name > ")
     last = input("Enter last name > ")
     dob = input("Enter date of birth > ")
@@ -38,16 +54,17 @@ def add_record():
     occupation = input("Enter occupation > ")
     nationality = input("Enter nationality > ")
 
-    new_doc = {'first': first.lower(), 'last': last.lower(), 'dob': dob,
-        'gender': gender, 'hair_colour': hair_colour, 'occupation': occupation,
-        'nationality': nationality}
+    new_doc = {"first": first.lower(), "last": last.lower(), "dob": dob,
+        "gender": gender, "hair_colour": hair_colour, "occupation": occupation,
+        "nationality": nationality}
 
     try:
         coll.insert_one(new_doc)
-        print('')
-        print('Document inserted')
+        print("")
+        print("Document inserted")
     except:
-        print('Error accessing the database')
+        print("Error accessing the database")
+
 
 def show_menu():
     print("")
@@ -60,22 +77,27 @@ def show_menu():
     option = input("Enter option: ")
     return option
 
+
 def main_loop():
     while True:
         option = show_menu()
         if option == "1":
             add_record()
         elif option == "2":
-                print("You have selected option 2")
+            find_record()
         elif option == "3":
-                print("You have selected option 3")
+            print("You have selected option 3")
         elif option == "4":
-                print("You have selected option 4")
+            print("You have selected option 4")
         elif option == "5":
             conn.close()
             break
         else:
             print("Invalid option")
         print("")
+
+
+conn = mongo_connect(MONGODB_URI)
+coll = conn[DBS_NAME][COLLECTION_NAME]
 
 main_loop()
